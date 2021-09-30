@@ -58,6 +58,13 @@ public class JacksonCustomVisitSerializer extends StdSerializer<Visit> {
 		}
 		jgen.writeStringField("date", formatter.format(visit.getDate()));
 		jgen.writeStringField("description", visit.getDescription());
+		if (visit.getAdHoc() != null) jgen.writeBooleanField("adHoc", visit.getAdHoc());
+        if (visit.getScheduled() != null) jgen.writeBooleanField("scheduled", visit.getScheduled());
+        /*
+         * visit.getPaid() should be used here instead of visit.getAdHoc()
+         */
+        if (visit.getAdHoc() != null) jgen.writeBooleanField("isPaid", visit.getPaid());
+
 
 		Pet pet = visit.getPet();
 		jgen.writeObjectFieldStart("pet");

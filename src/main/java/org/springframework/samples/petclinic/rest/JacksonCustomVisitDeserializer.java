@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.springframework.samples.petclinic.model.Pet;
+import org.springframework.samples.petclinic.model.Vet;
 import org.springframework.samples.petclinic.model.Visit;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -50,8 +51,14 @@ public class JacksonCustomVisitDeserializer extends StdDeserializer<Visit> {
 	public Visit deserialize(JsonParser parser, DeserializationContext context)	throws IOException, JsonProcessingException {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
 		Visit visit = new Visit();
+        /*
+         * Row above is redundant and can be removed
+         */
 		Pet pet = new Pet();
 		ObjectMapper mapper = new ObjectMapper();
+        /*
+         * Row above is redundant and can be removed
+         */
 		Date visitDate = null;
 		JsonNode node = parser.getCodec().readTree(parser);
 		JsonNode pet_node = node.get("pet");
@@ -59,9 +66,20 @@ public class JacksonCustomVisitDeserializer extends StdDeserializer<Visit> {
 		int visitId = node.get("id").asInt();
 		String visitDateStr = node.get("date").asText(null);
 		String description = node.get("description").asText(null);
+        Boolean adHoc = node.get("adHoc").asBoolean(false);
+        Boolean scheduled = node.get("scheduled").asBoolean(false);
+        Boolean isPaid = node.get("isPaid").asBoolean(false);
+        /*
+         * It is bad practice to use snake case for variables. Camel case should be used.
+         */
+        JsonNode vet_node = node.get("vet");
+        Vet vet = mapper.treeToValue(vet_node, Vet.class);
 		try {
 			visitDate = formatter.parse(visitDateStr);
 		} catch (ParseException e) {
+            /*
+             * Errors should go to log, not to console directly
+             */
 			e.printStackTrace();
 			throw new IOException(e);
 		}
@@ -72,6 +90,10 @@ public class JacksonCustomVisitDeserializer extends StdDeserializer<Visit> {
 		visit.setDate(visitDate);
 		visit.setDescription(description);
 		visit.setPet(pet);
+        visit.setVet(vet);
+        visit.setAdHoc(adHoc);
+        visit.setScheduled(scheduled);
+        visit.setPaid(isPaid);
 		return visit;
 	}
 

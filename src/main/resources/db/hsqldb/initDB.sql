@@ -60,10 +60,23 @@ CREATE TABLE visits (
   id          INTEGER IDENTITY PRIMARY KEY,
   pet_id      INTEGER NOT NULL,
   visit_date  DATE,
-  description VARCHAR(255)
+  description VARCHAR(255),
+  /*
+  Changes above should be implemented for mysql and postgresql databases as well
+  */
+  scheduled   BOOLEAN NOT NULL,
+  ad_hoc      BOOLEAN NOT NULL,
+  vet_id      INTEGER NOT NULL,
+  is_paid     BOOLEAN NOT NULL
 );
 ALTER TABLE visits ADD CONSTRAINT fk_visits_pets FOREIGN KEY (pet_id) REFERENCES pets (id);
 CREATE INDEX visits_pet_id ON visits (pet_id);
+
+/*
+Here we should decide, do we need foreign key by vet_id and index on this field?
+I think, index we should have anyway, as we will do delete visits by vet_id. Foreign key will give as some kind of consistency,
+but performance of insert queries will degrade (not dramatically) and we should decide, what we need more.
+*/
 
 CREATE  TABLE users (
   username    VARCHAR(20) NOT NULL ,

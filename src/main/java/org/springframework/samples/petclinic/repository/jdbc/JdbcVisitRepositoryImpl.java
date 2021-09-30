@@ -55,6 +55,9 @@ import java.util.Map;
  */
 @Repository
 @Profile("jdbc")
+/*
+ * SQL queries, which operate with `visits` table, should be changed according to DB table `visits` changes.
+ */
 public class JdbcVisitRepositoryImpl implements VisitRepository {
 
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -101,7 +104,7 @@ public class JdbcVisitRepositoryImpl implements VisitRepository {
 
         return visits;
     }
-    
+
 	@Override
 	public Visit findById(int id) throws DataAccessException {
 		Visit visit;

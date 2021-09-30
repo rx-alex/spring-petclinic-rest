@@ -32,6 +32,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    /*
+     * It is preferable to use Long for ids instead of Integer for production ready applications
+     */
     protected Integer id;
 
     public Integer getId() {

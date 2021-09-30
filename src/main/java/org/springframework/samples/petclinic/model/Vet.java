@@ -46,11 +46,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Table(name = "vets")
 public class Vet extends Person {
 
+    /*
+     * It will be better to use FetchType.LAZY here, because may be cases, where we don't need all specialities for
+     * concrete Vet
+     */
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "vet_specialties", joinColumns = @JoinColumn(name = "vet_id"),
         inverseJoinColumns = @JoinColumn(name = "specialty_id"))
     private Set<Specialty> specialties;
-    
+
     @JsonIgnore
     protected Set<Specialty> getSpecialtiesInternal() {
         if (this.specialties == null) {
@@ -77,7 +81,7 @@ public class Vet extends Person {
     public void addSpecialty(Specialty specialty) {
         getSpecialtiesInternal().add(specialty);
     }
-    
+
     public void clearSpecialties() {
         getSpecialtiesInternal().clear();
     }

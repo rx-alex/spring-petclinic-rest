@@ -28,6 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.model.Specialty;
 import org.springframework.samples.petclinic.model.Vet;
+import org.springframework.samples.petclinic.model.Visit;
 import org.springframework.samples.petclinic.service.ClinicService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -114,13 +115,25 @@ public class VetRestController {
 
     @PreAuthorize( "hasRole(@roles.VET_ADMIN)" )
 	@RequestMapping(value = "/{vetId}", method = RequestMethod.DELETE, produces = "application/json")
+    /*
+     * We shouldn't use @Transactional on controller method. Instead, we should use it on service method
+     */
 	@Transactional
 	public ResponseEntity<Void> deleteVet(@PathVariable("vetId") int vetId){
 		Vet vet = this.clinicService.findVetById(vetId);
 		if(vet == null){
 			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
 		}
-		this.clinicService.deleteVet(vet);
+        /*
+         * We shouldn't use iteration here due to performance reason. It will be more effectively to implement
+         * delete visits method using vetId as a parameter for single DB delete call. And such method should delete vet
+         * itself as well.
+         */
+        Collection<Visit> allVisits = this.clinicService.findAllVisits();
+        for (Visit visit: allVisits){
+            if (visit.getVet().getId() == vetId) clinicService.deleteVisit(visit);
+        }
+        this.clinicService.deleteVet(vet);
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
 

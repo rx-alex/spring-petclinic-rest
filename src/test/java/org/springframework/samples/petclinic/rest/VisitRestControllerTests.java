@@ -100,12 +100,18 @@ public class VisitRestControllerTests {
     	pet.setOwner(owner);
     	pet.setType(petType);
 
-
+        /*
+         * This test data preparation doesn't pay attention to the fact, that Visit entity now has vet attribute
+         * and tests above doesn't check this.
+         */
     	Visit visit = new Visit();
     	visit.setId(2);
     	visit.setPet(pet);
     	visit.setDate(new Date());
     	visit.setDescription("rabies shot");
+        visit.setAdHoc(true);
+        visit.setScheduled(false);
+        visit.setPaid(false);
     	visits.add(visit);
 
     	visit = new Visit();
@@ -127,7 +133,10 @@ public class VisitRestControllerTests {
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
             .andExpect(jsonPath("$.id").value(2))
-            .andExpect(jsonPath("$.description").value("rabies shot"));
+            .andExpect(jsonPath("$.description").value("rabies shot"))
+            .andExpect(jsonPath("$.adHoc").exists())
+            .andExpect(jsonPath("$.scheduled").exists())
+            .andExpect(jsonPath("$.isPaid").exists());
     }
 
     @Test
@@ -149,6 +158,9 @@ public class VisitRestControllerTests {
             .andExpect(content().contentType("application/json"))
         	.andExpect(jsonPath("$.[0].id").value(2))
         	.andExpect(jsonPath("$.[0].description").value("rabies shot"))
+        	.andExpect(jsonPath("$.[0].adHoc").exists())
+        	.andExpect(jsonPath("$.[0].scheduled").exists())
+        	.andExpect(jsonPath("$.[0].isPaid").exists())
         	.andExpect(jsonPath("$.[1].id").value(3))
         	.andExpect(jsonPath("$.[1].description").value("neutered"));
     }

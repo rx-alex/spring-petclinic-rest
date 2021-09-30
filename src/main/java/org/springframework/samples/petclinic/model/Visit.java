@@ -41,6 +41,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  */
 @Entity
 @Table(name = "visits")
+/*
+ * We can remove all two above annotations without any impact to whole application, as Spring can serialize and
+ * deserialize JSON objects on-fly
+ */
 @JsonSerialize(using = JacksonCustomVisitSerializer.class)
 @JsonDeserialize(using = JacksonCustomVisitDeserializer.class)
 public class Visit extends BaseEntity {
@@ -52,6 +56,10 @@ public class Visit extends BaseEntity {
     @Temporal(TemporalType.TIMESTAMP)
     @DateTimeFormat(pattern = "yyyy/MM/dd")
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
+    /*
+     * Usage of java.time.LocalDateTime instead of java.util.Date is preferable as it is more convenient to operate in processing methods.
+     * java.util.Date is outdated class.
+     */
     private Date date;
 
     /**
@@ -60,6 +68,29 @@ public class Visit extends BaseEntity {
     @NotEmpty
     @Column(name = "description")
     private String description;
+
+    /*
+     * All new added fields should have comments, as all old fields have their ones, as it is best practice in our project.
+     *
+     * Field `scheduled` should use simple boolean type as corresponding field in DB is not nullable. In such case we will
+     * have default value `false` for this field without any additional method call.
+     */
+    @Column(name = "scheduled")
+    private Boolean scheduled;
+
+    /*
+     * ad_hoc field here is redundant, as it's value is always the opposite value of scheduled field. We can remove this field
+     * without any impact.
+     */
+    @Column(name = "ad_hoc")
+    private Boolean adHoc;
+
+    @ManyToOne
+    @JoinColumn(name = "vet_id")
+    private Vet vet;
+
+    @Column(name = "is_paid")
+    private Boolean isPaid;
 
     /**
      * Holds value of property pet.
@@ -131,4 +162,38 @@ public class Visit extends BaseEntity {
         this.pet = pet;
     }
 
+    /*
+     * getter method for boolean field should have name started from `is`, isScheduled() for current case
+     */
+    public Boolean getScheduled() {
+        return scheduled;
+    }
+
+    public void setScheduled(Boolean scheduled) {
+        this.scheduled = scheduled;
+    }
+
+    public Boolean getAdHoc() {
+        return adHoc;
+    }
+
+    public void setAdHoc(Boolean adHoc) {
+        this.adHoc = adHoc;
+    }
+
+    public Vet getVet() {
+        return vet;
+    }
+
+    public void setVet(Vet vet) {
+        this.vet = vet;
+    }
+
+    public Boolean getPaid() {
+        return isPaid;
+    }
+
+    public void setPaid(Boolean paid) {
+        isPaid = paid;
+    }
 }
