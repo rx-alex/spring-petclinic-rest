@@ -44,11 +44,21 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  */
 
+/*
+ * It is not a good idea to use DB entities in controller, Data Transfer Object should be used instead.
+ * - it will decouple REST service contract from it implementation and future DB model changes won't affect the contract
+ * - it will make REST contract more useful for end users as we can hide technical fields from them
+ * - it will require one more type of Spring beans to implement - mappers. It will increase the difficulty of the
+ *   entire application, but it is the reasonable price for first two improvements
+ */
 @RestController
 @CrossOrigin(exposedHeaders = "errors, content-type")
 @RequestMapping("api/visits")
 public class VisitRestController {
 
+    /*
+     * We should use constructor-based autowiring instead of field autowiring as it hase some drawbacks
+     */
 	@Autowired
 	private ClinicService clinicService;
 
@@ -60,6 +70,9 @@ public class VisitRestController {
 		if (visits.isEmpty()){
 			return new ResponseEntity<Collection<Visit>>(HttpStatus.NOT_FOUND);
 		}
+        /*
+         * We can use diamond syntax to create ResponseEntity, if we use java with version number grater then 1.6
+         */
 		return new ResponseEntity<Collection<Visit>>(visits, HttpStatus.OK);
 	}
 
@@ -82,7 +95,10 @@ public class VisitRestController {
 			errors.addAllErrors(bindingResult);
 			headers.add("errors", errors.toJSON());
 			return new ResponseEntity<Visit>(headers, HttpStatus.BAD_REQUEST);
-		}
+        }
+        /*
+         * This row will go away if we will use primitive boolean for `paid` field
+         */
 		visit.setPaid(false);
         this.clinicService.saveVisit(visit);
 		headers.setLocation(ucBuilder.path("/api/visits/{id}").buildAndExpand(visit.getId()).toUri());
@@ -109,11 +125,17 @@ public class VisitRestController {
         currentVisit.setAdHoc(visit.getAdHoc());
         currentVisit.setScheduled(visit.getScheduled());
 		this.clinicService.saveVisit(currentVisit);
+        /*
+         * Return NO_CONTENT code here is incorrect, it have to be OK
+         */
 		return new ResponseEntity<Visit>(currentVisit, HttpStatus.NO_CONTENT);
 	}
 
     @PreAuthorize( "hasRole(@roles.OWNER_ADMIN)" )
 	@RequestMapping(value = "/{visitId}", method = RequestMethod.DELETE, produces = "application/json")
+    /*
+     * We shouldn't use @Transactional on controller method. Instead, we should use it on service method
+     */
 	@Transactional
 	public ResponseEntity<Void> deleteVisit(@PathVariable("visitId") int visitId){
 		Visit visit = this.clinicService.findVisitById(visitId);
@@ -125,6 +147,10 @@ public class VisitRestController {
 	}
 
     @PreAuthorize( "hasRole(@roles.VET_ADMIN)" )
+    /*
+     * It is preferable to use verb in REST method name, for example `/{visitId}/pay` or `/{visitId}/do-pay`.
+     * It is more correctly to use http method PATCH here as we will change only one attribute of whole Visit entity.
+     */
     @RequestMapping(value = "/{visitId}/payment", method = RequestMethod.PUT, produces = "application/json")
     public ResponseEntity<Visit> markPaid(@PathVariable("visitId") int visitId){
         Visit currentVisit = this.clinicService.findVisitById(visitId);
@@ -133,6 +159,9 @@ public class VisitRestController {
         }
         currentVisit.setPaid(true);
         this.clinicService.saveVisit(currentVisit);
+        /*
+         * We should return response with changed entity here, as method signature demands it from us
+         */
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

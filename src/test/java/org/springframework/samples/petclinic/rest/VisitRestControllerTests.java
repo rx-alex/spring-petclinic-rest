@@ -100,7 +100,10 @@ public class VisitRestControllerTests {
     	pet.setOwner(owner);
     	pet.setType(petType);
 
-
+        /*
+         * This test data preparation doesn't pay attention to the fact, that Visit entity now has vet attribute
+         * and tests above doesn't check this.
+         */
     	Visit visit = new Visit();
     	visit.setId(2);
     	visit.setPet(pet);

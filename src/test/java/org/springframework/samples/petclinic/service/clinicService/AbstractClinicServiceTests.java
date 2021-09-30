@@ -325,6 +325,9 @@ public abstract class AbstractClinicServiceTests {
     @Test
     @Transactional
     public void shouldDeleteVet(){
+        /*
+         * Here we should check, that visits for deleted vet are also deleted
+         */
     	Vet vet = this.clinicService.findVetById(1);
         this.clinicService.deleteVet(vet);
         try {

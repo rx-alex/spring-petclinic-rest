@@ -51,8 +51,14 @@ public class JacksonCustomVisitDeserializer extends StdDeserializer<Visit> {
 	public Visit deserialize(JsonParser parser, DeserializationContext context)	throws IOException, JsonProcessingException {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
 		Visit visit = new Visit();
+        /*
+         * Row above is redundant and can be removed
+         */
 		Pet pet = new Pet();
 		ObjectMapper mapper = new ObjectMapper();
+        /*
+         * Row above is redundant and can be removed
+         */
 		Date visitDate = null;
 		JsonNode node = parser.getCodec().readTree(parser);
 		JsonNode pet_node = node.get("pet");
@@ -63,11 +69,17 @@ public class JacksonCustomVisitDeserializer extends StdDeserializer<Visit> {
         Boolean adHoc = node.get("adHoc").asBoolean(false);
         Boolean scheduled = node.get("scheduled").asBoolean(false);
         Boolean isPaid = node.get("isPaid").asBoolean(false);
+        /*
+         * It is bad practice to use snake case for variables. Camel case should be used.
+         */
         JsonNode vet_node = node.get("vet");
         Vet vet = mapper.treeToValue(vet_node, Vet.class);
 		try {
 			visitDate = formatter.parse(visitDateStr);
 		} catch (ParseException e) {
+            /*
+             * Errors should go to log, not to console directly
+             */
 			e.printStackTrace();
 			throw new IOException(e);
 		}
